@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - BiblioUSM Makeover</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .search-card {
+            transition: all 0.3s ease;
+        }
+        .search-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center">
+                        <img src="https://libapps.s3.amazonaws.com/sites/13565/groups/23921/banner/Direccio%CC%81n_de_Informacio%CC%81n_y_Documentacio%CC%81n_Bibliogra%CC%81fica_Institucional.png" class="h-10 mr-2" alt="Logo">
+                        <span class="text-xl font-bold text-gray-800">BiblioUSM Makeover</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-blue-600 font-medium">Inicio</a>
+                    <div class="relative group">
+                        <button class="text-gray-700 hover:text-blue-600 flex items-center">
+                            Tu Biblioteca <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
+                        </button>
+                        <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-20 before:content-[''] before:block before:absolute before:-top-2 before:left-0 before:w-full before:h-2">
+                            <a href="placeholder.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Biblioteca Central</a>
+                            <a href="placeholder.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sede Viña del Mar</a>
+                            <a href="placeholder.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sede Concepción</a>
+                            <a href="placeholder.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Campus Vitacura</a>
+                            <a href="placeholder.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Campus San Joaquín</a>
+                        </div>
+                    </div>
+                    <a href="placeholder.html" class="text-gray-700 hover:text-blue-600">Quiénes somos</a>
+                    <div class="relative group">
+                        <button class="text-gray-700 hover:text-blue-600 flex items-center">
+                            Servicios <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
+                        </button>
+                        <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-20 before:content-[''] before:block before:absolute before:-top-2 before:left-0 before:w-full before:h-2">
+                            <a href="placeholder.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Biblioteca en Línea</a>
+                        </div>
+                    </div>
+                    <a href="placeholder.html" class="text-gray-700 hover:text-blue-600">Inclusión</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="menu-toggle" class="text-gray-700">
+                        <i data-feather="menu"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Filters Sidebar -->
+            <div class="lg:w-1/4">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+                    <h2 class="text-xl font-bold mb-4">Filtros</h2>
+                    
+                    <!-- Library Filter -->
+                    <div class="mb-6">
+                        <h3 class="font-medium mb-2">Bibliotecas</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="library" value="Biblioteca Central" class="rounded text-blue-600 mr-2">
+                                <span>Biblioteca Central</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="library" value="Sede Viña del Mar" class="rounded text-blue-600 mr-2">
+                                <span>Sede Viña del Mar</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="library" value="Sede Concepción" class="rounded text-blue-600 mr-2">
+                                <span>Sede Concepción</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="library" value="Campus Vitacura" class="rounded text-blue-600 mr-2">
+                                <span>Campus Vitacura</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="library" value="Campus San Joaquín" class="rounded text-blue-600 mr-2">
+                                <span>Campus San Joaquín</span>
+                            </label>
+</div>
+                    </div>
+
+                    <!-- Availability Filter -->
+                    <div class="mb-6">
+                        <h3 class="font-medium mb-2">Disponibilidad</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="availability" value="available" class="rounded text-blue-600 mr-2" checked>
+                                <span>Disponible</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="availability" value="borrowed" class="rounded text-blue-600 mr-2" checked>
+                                <span>Prestado</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="availability" value="reserved" class="rounded text-blue-600 mr-2" checked>
+                                <span>Reservado</span>
+                            </label>
+</div>
+                    </div>
+
+                    <!-- Material Type Filter -->
+                    <div class="mb-6">
+                        <h3 class="font-medium mb-2">Tipo de material</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="type" value="book" class="rounded text-blue-600 mr-2" checked>
+                                <span>Libros</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="type" value="magazine" class="rounded text-blue-600 mr-2">
+                                <span>Revistas</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="type" value="thesis" class="rounded text-blue-600 mr-2">
+                                <span>Tesis</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="type" value="audiovisual" class="rounded text-blue-600 mr-2">
+                                <span>Audiovisual</span>
+                            </label>
+</div>
+                    </div>
+                    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition apply-filters">
+                        Aplicar filtros
+                    </button>
+</div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="lg:w-3/4">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8">Explora nuestro catálogo</h1>
+                
+                <!-- Search Form -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                    <form class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-grow">
+                            <input type="text" placeholder="Buscar por título, autor, ISBN..." 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div class="flex-shrink-0">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg w-full md:w-auto transition">
+                                <i data-feather="search" class="inline mr-2"></i> Buscar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results List -->
+                <div class="space-y-4">
+                    <!-- Result Items will be populated by JavaScript -->
+                    <div id="book-results"></div>
+
+                    <!-- Book Template (hidden) -->
+                    <template id="book-template">
+                        <div class="bg-white rounded-lg shadow-md p-6 book-item" data-library="" data-available="" data-type="book">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="md:w-1/6">
+                                    <img src="" alt="Book Cover" class="w-full rounded book-cover">
+                                </div>
+                                <div class="md:w-5/6">
+                                    <h3 class="text-xl font-bold text-gray-800 mb-1 book-title"></h3>
+                                    <p class="text-gray-600 mb-2 book-author"></p>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+                                        <div>
+                                            <p class="text-sm text-gray-500">ISBN</p>
+                                            <p class="text-gray-700 book-isbn"></p>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-500">Año</p>
+                                            <p class="text-gray-700 book-year"></p>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-gray-500">Editorial</p>
+                                            <p class="text-gray-700 book-publisher"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 items-center justify-between">
+                                        <div>
+                                            <span class="px-2 py-1 text-xs rounded-full book-status"></span>
+                                            <span class="text-sm text-gray-600 book-location"></span>
+                                        </div>
+                                        <button class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition reserve-btn disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                            Reservar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+</div>
+
+                <!-- Pagination -->
+                <div class="mt-8 flex justify-center">
+                    <nav class="flex items-center space-x-2">
+                        <button class="px-4 py-2 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">Anterior</button>
+                        <button class="px-4 py-2 rounded bg-blue-600 text-white">1</button>
+                        <button class="px-4 py-2 rounded border border-gray-300 text-gray-600 hover:bg-gray-100">Siguiente</button>
+                    </nav>
+                </div>
+            </div>
+</div>
+        </div>
+    </main>
+<!-- Reuse existing footer -->
+    <footer class="bg-gray-900 text-white pt-12 pb-6">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">BiblioUSM Makeover</h3>
+                    <p class="mb-4">Tu portal de acceso a recursos académicos y servicios bibliotecarios de primer nivel.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="hover:text-blue-400 transition"><i data-feather="instagram"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition"><i data-feather="facebook"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition"><i data-feather="twitter"></i></a>
+                        <a href="#" class="hover:text-blue-400 transition"><i data-feather="youtube"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Enlaces rápidos</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="hover:text-blue-400 transition">Inicio</a></li>
+                        <li><a href="catalogo.html" class="hover:text-blue-400 transition">Catálogo</a></li>
+                        <li><a href="placeholder.html" class="hover:text-blue-400 transition">Biblioteca en línea</a></li>
+                        <li><a href="placeholder.html" class="hover:text-blue-400 transition">Contacto</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Sedes</h3>
+                    <ul class="space-y-2">
+                        <li><a href="placeholder.html" class="hover:text-blue-400 transition">Casa Central</a></li>
+                        <li><a href="placeholder.html" class="hover:text-blue-400 transition">Viña del Mar</a></li>
+                        <li><a href="placeholder.html" class="hover:text-blue-400 transition">Concepción</a></li>
+                        <li><a href="placeholder.html" class="hover:text-blue-400 transition">Vitacura</a></li>
+                        <li><a href="placeholder.html" class="hover:text-blue-400 transition">San Joaquín</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Contacto</h3>
+                    <p class="mb-2"><i data-feather="mail" class="inline mr-2 w-4 h-4"></i> biblioteca@usm.cl</p>
+                    <p class="mb-2"><i data-feather="phone" class="inline mr-2 w-4 h-4"></i> +56 32 2654 321</p>
+                    <p><i data-feather="map-pin" class="inline mr-2 w-4 h-4"></i> Avenida España 1680, Valparaíso</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-6 text-center text-gray-400">
+                <p>© 2025 DIUpibes Inc. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // Book data
+        const books = [
+            {
+                title: "Cien años de soledad",
+                author: "Gabriel García Márquez",
+                cover: "http://static.photos/education/120x180/1",
+                isbn: "978-0307474728",
+                year: "1967",
+                publisher: "Sudamericana",
+                status: "available",
+                libraries: ["Biblioteca Central", "Campus San Joaquín"],
+                type: "book",
+                dueDate: ""
+            },
+            {
+                title: "Rayuela",
+                author: "Julio Cortázar",
+                cover: "http://static.photos/education/120x180/2",
+                isbn: "978-8437604571",
+                year: "1963",
+                publisher: "Alfaguara",
+                status: "borrowed",
+                libraries: ["Sede Viña del Mar"],
+                type: "book",
+                dueDate: "15/12/2023"
+            },
+            {
+                title: "Ficciones",
+                author: "Jorge Luis Borges",
+                cover: "http://static.photos/education/120x180/3",
+                isbn: "978-8420674232",
+                year: "1944",
+                publisher: "Emecé",
+                status: "reserved",
+                libraries: ["Campus Vitacura"],
+                type: "book",
+                dueDate: "20/12/2023"
+            }
+        ];
+
+        // Status classes
+        const statusClasses = {
+            available: "bg-green-100 text-green-800",
+            borrowed: "bg-yellow-100 text-yellow-800",
+            reserved: "bg-blue-100 text-blue-800"
+        };
+
+        // Status text
+        const statusText = {
+            available: "Disponible",
+            borrowed: "Prestado",
+            reserved: "Reservado"
+        };
+
+        // Render books
+        function renderBooks(filteredBooks = books) {
+            const resultsContainer = document.getElementById('book-results');
+            const template = document.getElementById('book-template');
+            
+            resultsContainer.innerHTML = '';
+            
+            filteredBooks.forEach(book => {
+                const clone = template.content.cloneNode(true);
+                const item = clone.querySelector('.book-item');
+                
+                // Set data attributes for filtering
+                item.dataset.library = book.libraries.join(',');
+                item.dataset.available = book.status;
+                item.dataset.type = book.type;
+                
+                // Fill in book data
+                clone.querySelector('.book-cover').src = book.cover;
+                clone.querySelector('.book-title').textContent = book.title;
+                clone.querySelector('.book-author').textContent = book.author;
+                clone.querySelector('.book-isbn').textContent = book.isbn;
+                clone.querySelector('.book-year').textContent = book.year;
+                clone.querySelector('.book-publisher').textContent = book.publisher;
+                
+                // Set status
+                const statusEl = clone.querySelector('.book-status');
+                statusEl.textContent = statusText[book.status];
+                statusEl.className = `px-2 py-1 text-xs rounded-full ${statusClasses[book.status]}`;
+                
+                // Set location
+                const locationText = book.status === 'available' ? 
+                    book.libraries.join(', ') : 
+                    `${book.libraries[0]} (${book.status === 'borrowed' ? 'Devuelve' : 'Disponible'}: ${book.dueDate})`;
+                clone.querySelector('.book-location').textContent = locationText;
+                
+                // Set reserve button state
+                const reserveBtn = clone.querySelector('.reserve-btn');
+                if (book.status !== 'available') {
+                    reserveBtn.disabled = true;
+                } else {
+                    reserveBtn.addEventListener('click', () => {
+                        alert(`Has reservado "${book.title}". Por favor recógelo en 48 horas.`);
+                        book.status = 'reserved';
+                        renderBooks();
+                    });
+                }
+                
+                resultsContainer.appendChild(clone);
+            });
+        }
+
+        // Filter books
+        function filterBooks() {
+            const libraryFilters = Array.from(document.querySelectorAll('input[name="library"]:checked')).map(cb => cb.value);
+            const availabilityFilters = Array.from(document.querySelectorAll('input[name="availability"]:checked')).map(cb => cb.value);
+            const typeFilters = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(cb => cb.value);
+            
+            const filtered = books.filter(book => {
+                // Filter by library
+                if (libraryFilters.length > 0 && !libraryFilters.some(lib => book.libraries.includes(lib))) {
+                    return false;
+                }
+                
+                // Filter by availability
+                if (availabilityFilters.length > 0 && !availabilityFilters.includes(book.status)) {
+                    return false;
+                }
+                
+                // Filter by type
+                if (typeFilters.length > 0 && !typeFilters.includes(book.type)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            renderBooks(filtered);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile menu toggle
+            document.getElementById('menu-toggle')?.addEventListener('click', function() {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            });
+
+            // Toggle filter sections on mobile
+            document.querySelectorAll('#mobile-menu div.relative button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const menu = this.nextElementSibling;
+                    menu.classList.toggle('hidden');
+                });
+            });
+
+            // Apply filters button
+            document.querySelector('.apply-filters').addEventListener('click', filterBooks);
+
+            // Initialize Feather Icons
+            feather.replace();
+
+            // Render initial books
+            renderBooks();
+        });
+    </script>
+</body>
+</html>
