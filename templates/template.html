@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Reserva - Biblioteca Digital USM</title>
+    <title>Biblioteca Digital USM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
@@ -31,7 +31,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="font-sans bg-gray-50">
 
     <!-- Navigation -->
     <nav class="bg-white shadow-lg">
@@ -106,90 +106,12 @@
         </div>
     </div>
 
-    <!-- Main Content -->
     <main class="max-w-6xl mx-auto px-4 py-8">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Nueva reserva</h1>
-        
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <div>
-                    <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Localización</label>
-                    <select id="location" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Seleccione una localización</option>
-                        <option>Campus Casa Central</option>
-                        <option>Campus San Joaquín</option>
-                        <option>Campus Vitacura</option>
-                        <option>Sede Viña del Mar</option>
-                        <option>Sede Concepción</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                    <select id="category" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Seleccione una categoría</option>
-                    </select>
-                </div>
-                <script>
-                    document.getElementById('location').addEventListener('change', function() {
-                        const categorySelect = document.getElementById('category');
-                        categorySelect.innerHTML = '<option>Seleccione una categoría</option>';
-                        if (this.value === 'Campus Casa Central') {
-                            categorySelect.innerHTML += '<option>Sala de Estudios Grupal</option><option>Sala de Estudios individual</option>';
-                        } else if (this.value === 'Campus San Joaquín') {
-                            categorySelect.innerHTML += '<option>Salas de Estudio</option><option>Sala Circular</option><option>Sala de Estudios Externa</option>';
-                        } else if (this.value === 'Campus Vitacura' || this.value === 'Sede Concepción') {
-                            categorySelect.innerHTML += '<option>Sala de Estudio</option>';
-                        } else if (this.value === 'Sede Viña del Mar') {
-                            categorySelect.innerHTML += '<option>Sala de Estudios Grupal</option><option>Sala de Estudios individual</option>';
-                        } 
+    
 
-                    });
-                </script>
-                
-                <div>
-                    <label for="capacity" class="block text-sm font-medium text-gray-700 mb-1">Capacidad</label>
-                    <select id="capacity" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option>Seleccione capacidad</option>
-                    </select>
-                </div>
-                <script>
-                    document.getElementById('location').addEventListener('change', function() {
-                        const categorySelect = document.getElementById('capacity');
-                        categorySelect.innerHTML = '<option>Seleccione una categoría</option>';
-                        if (this.value === 'Campus Casa Central') {
-                            categorySelect.innerHTML += '<option>1 Persona</option><option>2-4 Personas</option><option>4-6 Personas</option><option>Más de 6 Personas</option>';
-                        } else if (this.value === 'Campus San Joaquín') {
-                            categorySelect.innerHTML += '<option>2-4 Personas</option><option>Más de 6 Personas</option>';
-                        } else if (this.value === 'Campus Vitacura' || this.value === 'Sede Concepción') {
-                            categorySelect.innerHTML += '<option>2-4 Personas</option><option>4-6 Personas</option>';
-                        } else if (this.value === 'Sede Viña del Mar') {
-                            categorySelect.innerHTML += '<option>1 Persona</option><option>2-4 Personas</option><option>4-6 Personas</option>';
-                        } 
-
-                    });
-                </script>
-            </div>
-            
-            <div class="mb-6">
-                <h2 class="text-lg font-medium text-gray-700 mb-3">Filtros</h2>
-                <div class="flex items-center space-x-4">
-                    <label class="flex items-center space-x-2">
-                        <input type="checkbox" class="filter-checkbox h-4 w-4">
-                        <span class="text-gray-700">Accessible Seat/Space</span>
-                    </label>
-                    <label class="flex items-center space-x-2">
-                        <input type="checkbox" class="filter-checkbox h-4 w-4">
-                        <span class="text-gray-700">Power Available</span>
-                    </label>
-                </div>
-            </div>
-            
-            <a href="availability.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium inline-block">
-                Mostrar disponibilidad
-            </a>
-        </div>
     </main>
+    
+
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-white pt-12 pb-6">
@@ -237,24 +159,6 @@
         </div>
     </footer>
 
-    <!-- Privacy Modal -->
-    <div id="privacyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold">Declaración de privacidad</h3>
-                <button onclick="closePrivacyModal()" class="text-gray-500 hover:text-gray-700">
-                    <i data-feather="x"></i>
-                </button>
-            </div>
-            <p class="text-sm text-gray-600 mb-4">
-                Para utilizar esta plataforma, el sistema escribe una o más cookies en su navegador. Estas cookies no son compartidas con terceros. Además, su dirección IP y la información del navegador se almacenan en los registros del servidor y se utilizan para generar estadísticas de uso anónimas. Su institución utiliza estas estadísticas para evaluar el uso del contenido de la biblioteca, y la información no se comparte con terceros.
-            </p>
-            <button onclick="closePrivacyModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded text-sm">
-                Cerrar
-            </button>
-        </div>
-    </div>
-
     <script>
         // Mobile menu toggle
         document.getElementById('menu-toggle').addEventListener('click', function() {
@@ -275,17 +179,9 @@
             backgroundColor: 0x111827,
             size: 0.8
         });
-    </script>
-    <script>
+
+        // Initialize Feather Icons
         feather.replace();
-        
-        function closePrivacyModal() {
-            document.getElementById('privacyModal').classList.add('hidden');
-        }
-        
-        function openPrivacyModal() {
-            document.getElementById('privacyModal').classList.remove('hidden');
-        }
     </script>
 </body>
 </html>

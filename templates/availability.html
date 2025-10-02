@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biblioteca Digital USM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+
+  <style>
+    :root {
+      --slot-h: 28px;
+      --room-w: 200px;
+    }
+
+    /* Contenedor sin scroll horizontal */
+    .sheet {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
+      overflow: visible;
+      /* <- sin slider */
+    }
+
+    /* 12 columnas (horas) compactas para caber en pantalla común */
+    .timeline-head {
+      display: grid;
+      grid-template-columns: var(--room-w) repeat(12, minmax(52px, 1fr));
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+      font-size: .95rem;
+    }
+
+    .timeline-row {
+      display: grid;
+      align-items: center;
+      grid-template-columns: var(--room-w) repeat(12, minmax(52px, 1fr));
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .timeline-row:hover {
+      background: #f8fafc
+    }
+
+    /* Línea divisoria más delgada (0.5px) entre “Espacio” y horas y entre horas */
+    .timeline-head>div {
+      border-left: 0 !important;
+    }
+
+    .timeline-head>div+div {
+      border-left: 0.5px solid #e2e8f0 !important;
+    }
+
+    .hour {
+      position: relative;
+      height: var(--slot-h);
+      border-left: 0.5px solid #e2e8f0;
+      /* <- más fina */
+      background: #fff;
+      isolation: isolate;
+    }
+
+    .hour input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer
+    }
+
+    .hour label {
+      position: absolute;
+      inset: 6px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, .02);
+      outline: 1px solid rgba(15, 23, 42, .08);
+      transition: transform .08s ease, background .12s ease, box-shadow .12s ease, outline-color .12s ease;
+    }
+
+    /* separador visual de medias horas (sutil) */
+    .hour label::after {
+      content: "";
+      position: absolute;
+      top: 6px;
+      bottom: 6px;
+      left: 50%;
+      width: 1px;
+      transform: translateX(-0.5px);
+      background: #e2e8f0;
+      border-radius: 2px;
+      opacity: .9;
+    }
+
+    .hour:hover label {
+      outline-color: rgb(59 130 246 / .7)
+    }
+
+    .hour input:checked+label {
+      background: linear-gradient(90deg, rgba(34, 197, 94, .28) 0 100%);
+      box-shadow: inset 0 0 0 2px rgb(34 197 94);
+    }
+
+    .hour.busy label {
+      background: linear-gradient(90deg, rgba(239, 68, 68, .26) 0 100%);
+      box-shadow: inset 0 0 0 2px rgb(239 68 68);
+    }
+
+    .hour.busy input {
+      pointer-events: none
+    }
+
+    @media (max-width: 1024px) {
+      :root {
+        --room-w: 180px
+      }
+
+      .timeline-head,
+      .timeline-row {
+        grid-template-columns: var(--room-w) repeat(12, minmax(48px, 1fr));
+      }
+
+      .hour label {
+        inset: 4px;
+      }
+    }
+
+    /* Vanta como fondo claro */
+    #vanta-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-gray-50">
+  <!-- Vanta background -->
+  <div id="vanta-bg"></div>
+
+  <!-- Navigation -->
+  <nav class="bg-white/90 backdrop-blur shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <a href="#" class="flex items-center">
+            <img
+              src="https://libapps.s3.amazonaws.com/sites/13565/groups/23921/banner/Direccio%CC%81n_de_Informacio%CC%81n_y_Documentacio%CC%81n_Bibliogra%CC%81fica_Institucional.png"
+              class="h-10 mr-2 rounded" alt="Logo">
+            <span class="text-xl font-bold text-gray-800">BiblioUSM Makeover</span>
+          </a>
+        </div>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#" class="text-blue-600 font-medium">Inicio</a>
+          <div class="relative group">
+            <button class="text-gray-700 hover:text-blue-600 flex items-center">
+              Tu Biblioteca <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
+            </button>
+            <div
+              class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-20 before:content-[''] before:block before:absolute before:-top-2 before:left-0 before:w-full before:h-2">
+              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Biblioteca Central</a>
+              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sede Viña del Mar</a>
+              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sede Concepción</a>
+              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Campus Vitacura</a>
+              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Campus San Joaquín</a>
+            </div>
+          </div>
+          <a href="#" class="text-gray-700 hover:text-blue-600">Quiénes somos</a>
+          <div class="relative group">
+            <button class="text-gray-700 hover:text-blue-600 flex items-center">
+              Servicios <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
+            </button>
+            <div
+              class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-20 before:content-[''] before:block before:absolute before:-top-2 before:left-0 before:w-full before:h-2">
+              <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Biblioteca en Línea</a>
+            </div>
+          </div>
+          <a href="#" class="text-gray-700 hover:text-blue-600">Inclusión</a>
+        </div>
+        <div class="md:hidden flex items-center">
+          <button id="menu-toggle" class="text-gray-700">
+            <i data-feather="menu"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
+    <div class="px-2 pt-2 pb-3 space-y-1">
+      <a href="#" class="block px-3 py-2 text-blue-600 font-medium">Inicio</a>
+      <div class="relative">
+        <button class="w-full text-left px-3 py-2 text-gray-700 hover:text-blue-600 flex justify-between items-center">
+          Tu Biblioteca <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
+        </button>
+        <div class="hidden">
+          <a href="#" class="block pl-6 py-2 text-gray-700 hover:bg-gray-100">Biblioteca Central</a>
+          <a href="#" class="block pl-6 py-2 text-gray-700 hover:bg-gray-100">Sede Viña del Mar</a>
+          <a href="#" class="block pl-6 py-2 text-gray-700 hover:bg-gray-100">Sede Concepción</a>
+          <a href="#" class="block pl-6 py-2 text-gray-700 hover:bg-gray-100">Campus Vitacura</a>
+          <a href="#" class="block pl-6 py-2 text-gray-700 hover:bg-gray-100">Campus San Joaquín</a>
+        </div>
+      </div>
+      <a href="#" class="block px-3 py-2 text-gray-700 hover:text-blue-600">Quiénes somos</a>
+      <div class="relative">
+        <button class="w-full text-left px-3 py-2 text-gray-700 hover:text-blue-600 flex justify-between items-center">
+          Servicios <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
+        </button>
+        <div class="hidden">
+          <a href="#" class="block pl-6 py-2 text-gray-700 hover:bg-gray-100">Biblioteca en Línea</a>
+        </div>
+      </div>
+      <a href="#" class="block px-3 py-2 text-gray-700 hover:text-blue-600">Inclusión</a>
+    </div>
+  </div>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <section class="mb-6">
+      <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Disponibilidad</h1>
+      <p class="text-slate-600 mt-1">Selección por hora (08:00-20:00). Cada bloque marca 60 minutos.</p>
+
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <label class="inline-flex items-center gap-2 bg-white shadow-sm border border-slate-200 rounded-lg px-3 py-2">
+          <span class="text-slate-600">📅 Fecha</span>
+          <input type="date" class="outline-none bg-transparent text-slate-800" />
+        </label>
+        <button class="px-3 py-2 rounded-lg border border-slate-200 bg-white shadow-sm hover:bg-slate-50">◀ Día
+          anterior</button>
+        <button class="px-3 py-2 rounded-lg border border-slate-200 bg-white shadow-sm hover:bg-slate-50">Día siguiente
+          ▶</button>
+      </div>
+    </section>
+
+    <div class="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-3">
+      <span class="inline-flex items-center gap-2">
+        <span
+          class="w-3 h-3 bg-[rgba(15,23,42,.02)] border border-[rgba(15,23,42,.08)] border-[1.5px] rounded inline-block"></span>Disponible
+      </span>
+      <span class="inline-flex items-center gap-2">
+        <span class="w-3 h-3 rounded bg-green-700 border border-green-900 inline-block"></span>Seleccionado
+      </span>
+      <span class="inline-flex items-center gap-2">
+        <span class="w-3 h-3 rounded bg-red-600 inline-block"></span>No disponible
+      </span>
+    </div>
+
+    <div class="sheet">
+      <!-- Encabezado: 12 horas -->
+      <div class="timeline-head">
+        <div class="px-3 py-2 font-semibold">
+          Espacio
+          <span class="block text-xs font-normal text-slate-500">08:00-20:00 (1 h)</span>
+        </div>
+        <div class="text-center px-1 py-2">8:00</div>
+        <div class="text-center px-1 py-2">9:00</div>
+        <div class="text-center px-1 py-2">10:00</div>
+        <div class="text-center px-1 py-2">11:00</div>
+        <div class="text-center px-1 py-2">12:00</div>
+        <div class="text-center px-1 py-2">13:00</div>
+        <div class="text-center px-1 py-2">14:00</div>
+        <div class="text-center px-1 py-2">15:00</div>
+        <div class="text-center px-1 py-2">16:00</div>
+        <div class="text-center px-1 py-2">17:00</div>
+        <div class="text-center px-1 py-2">18:00</div>
+        <div class="text-center px-1 py-2">19:00</div>
+      </div>
+
+      <!-- Sección -->
+      <div class="px-3 py-2 font-semibold bg-slate-50 text-slate-700 border-t border-slate-200">
+        Salas de Estudio <span class="font-normal text-slate-500">(Capacidad 6–8)</span>
+      </div>
+
+      <!-- Sala 01 -->
+      <div class="timeline-row">
+        <div class="px-3 py-2">
+          <div class="font-semibold text-slate-800">Sala 01 — Campus SJ</div>
+          <div class="text-xs text-slate-500">Capacidad 6</div>
+        </div>
+        <div class="hour"><input id="s01_h08" type="checkbox"><label for="s01_h08" title="08:00–08:59"></label></div>
+        <div class="hour"><input id="s01_h09" type="checkbox"><label for="s01_h09" title="09:00–09:59"></label></div>
+        <div class="hour busy"><input id="s01_h10" type="checkbox" disabled><label for="s01_h10"
+            title="10:00–10:59"></label></div>
+        <div class="hour busy"><input id="s01_h11" type="checkbox" disabled><label for="s01_h11"
+            title="11:00–11:59"></label></div>
+        <div class="hour"><input id="s01_h12" type="checkbox"><label for="s01_h12" title="12:00–12:59"></label></div>
+        <div class="hour"><input id="s01_h13" type="checkbox"><label for="s01_h13" title="13:00–13:59"></label></div>
+        <div class="hour"><input id="s01_h14" type="checkbox"><label for="s01_h14" title="14:00–14:59"></label></div>
+        <div class="hour"><input id="s01_h15" type="checkbox"><label for="s01_h15" title="15:00–15:59"></label></div>
+        <div class="hour"><input id="s01_h16" type="checkbox"><label for="s01_h16" title="16:00–16:59"></label></div>
+        <div class="hour"><input id="s01_h17" type="checkbox"><label for="s01_h17" title="17:00–17:59"></label></div>
+        <div class="hour"><input id="s01_h18" type="checkbox"><label for="s01_h18" title="18:00–18:59"></label></div>
+        <div class="hour"><input id="s01_h19" type="checkbox"><label for="s01_h19" title="19:00–19:59"></label></div>
+      </div>
+
+      <!-- Sala 02 -->
+      <div class="timeline-row">
+        <div class="px-3 py-2">
+          <div class="font-semibold text-slate-800">Sala 02 — Campus SJ</div>
+          <div class="text-xs text-slate-500">Capacidad 6</div>
+        </div>
+        <div class="hour"><input id="s02_h08" type="checkbox"><label for="s02_h08"></label></div>
+        <div class="hour"><input id="s02_h09" type="checkbox"><label for="s02_h09"></label></div>
+        <div class="hour"><input id="s02_h10" type="checkbox"><label for="s02_h10"></label></div>
+        <div class="hour"><input id="s02_h11" type="checkbox"><label for="s02_h11"></label></div>
+        <div class="hour busy"><input id="s02_h12" type="checkbox" disabled><label for="s02_h12"></label></div>
+        <div class="hour busy"><input id="s02_h13" type="checkbox" disabled><label for="s02_h13"></label></div>
+        <div class="hour"><input id="s02_h14" type="checkbox"><label for="s02_h14"></label></div>
+        <div class="hour"><input id="s02_h15" type="checkbox"><label for="s02_h15"></label></div>
+        <div class="hour busy"><input id="s02_h16" type="checkbox" disabled><label for="s02_h16"></label></div>
+        <div class="hour"><input id="s02_h17" type="checkbox"><label for="s02_h17"></label></div>
+        <div class="hour"><input id="s02_h18" type="checkbox"><label for="s02_h18"></label></div>
+        <div class="hour"><input id="s02_h19" type="checkbox"><label for="s02_h19"></label></div>
+      </div>
+
+      <!-- Sala 03 -->
+      <div class="timeline-row">
+        <div class="px-3 py-2">
+          <div class="font-semibold text-slate-800">Sala 03 — Campus SJ</div>
+          <div class="text-xs text-slate-500">Capacidad 6</div>
+        </div>
+        <div class="hour busy"><input id="s03_h08" type="checkbox" disabled><label for="s03_h08"></label></div>
+        <div class="hour busy"><input id="s03_h09" type="checkbox" disabled><label for="s03_h09"></label></div>
+        <div class="hour busy"><input id="s03_h10" type="checkbox" disabled><label for="s03_h10"></label></div>
+        <div class="hour busy"><input id="s03_h11" type="checkbox" disabled><label for="s03_h11"></label></div>
+        <div class="hour"><input id="s03_h12" type="checkbox"><label for="s03_h12"></label></div>
+        <div class="hour"><input id="s03_h13" type="checkbox"><label for="s03_h13"></label></div>
+        <div class="hour"><input id="s03_h14" type="checkbox"><label for="s03_h14"></label></div>
+        <div class="hour"><input id="s03_h15" type="checkbox"><label for="s03_h15"></label></div>
+        <div class="hour"><input id="s03_h16" type="checkbox"><label for="s03_h16"></label></div>
+        <div class="hour"><input id="s03_h17" type="checkbox"><label for="s03_h17"></label></div>
+        <div class="hour"><input id="s03_h18" type="checkbox"><label for="s03_h18"></label></div>
+        <div class="hour"><input id="s03_h19" type="checkbox"><label for="s03_h19"></label></div>
+      </div>
+
+      <!-- Externas -->
+      <div class="px-3 py-2 font-semibold bg-slate-50 text-slate-700 border-t border-slate-200">
+        Salas de Estudio Externas <span class="font-normal text-slate-500">(Capacidad 8)</span>
+      </div>
+
+      <!-- Sala 09 -->
+      <div class="timeline-row">
+        <div class="px-3 py-2">
+          <div class="font-semibold text-slate-800">Sala 09 — Campus SJ</div>
+          <div class="text-xs text-slate-500">Capacidad 8</div>
+        </div>
+        <div class="hour"><input id="s09_h08" type="checkbox"><label for="s09_h08"></label></div>
+        <div class="hour"><input id="s09_h09" type="checkbox"><label for="s09_h09"></label></div>
+        <div class="hour"><input id="s09_h10" type="checkbox"><label for="s09_h10"></label></div>
+        <div class="hour"><input id="s09_h11" type="checkbox"><label for="s09_h11"></label></div>
+        <div class="hour"><input id="s09_h12" type="checkbox"><label for="s09_h12"></label></div>
+        <div class="hour"><input id="s09_h13" type="checkbox"><label for="s09_h13"></label></div>
+        <div class="hour busy"><input id="s09_h14" type="checkbox" disabled><label for="s09_h14"></label></div>
+        <div class="hour busy"><input id="s09_h15" type="checkbox" disabled><label for="s09_h15"></label></div>
+        <div class="hour busy"><input id="s09_h16" type="checkbox" disabled><label for="s09_h16"></label></div>
+        <div class="hour busy"><input id="s09_h17" type="checkbox" disabled><label for="s09_h17"></label></div>
+        <div class="hour busy"><input id="s09_h18" type="checkbox" disabled><label for="s09_h18"></label></div>
+        <div class="hour busy"><input id="s09_h19" type="checkbox" disabled><label for="s09_h19"></label></div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex justify-end gap-2 px-3 py-3 border-t border-slate-200 bg-slate-50">
+        <button class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-white">Limpiar
+          selección</button>
+        <button id="reserveBtn"
+          class="px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-500">Reservar
+          selección</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white pt-12 pb-6">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <h3 class="text-lg font-bold mb-4">BiblioUSM Makeover</h3>
+          <p class="mb-4">Tu portal de acceso a recursos académicos y servicios bibliotecarios de primer nivel.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="hover:text-blue-400 transition"><i data-feather="instagram"></i></a>
+            <a href="#" class="hover:text-blue-400 transition"><i data-feather="facebook"></i></a>
+            <a href="#" class="hover:text-blue-400 transition"><i data-feather="twitter"></i></a>
+            <a href="#" class="hover:text-blue-400 transition"><i data-feather="youtube"></i></a>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-4">Enlaces rápidos</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-blue-400 transition">Catálogo</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Biblioteca en línea</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Horarios</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Contacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-4">Sedes</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-blue-400 transition">Casa Central</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Viña del Mar</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Concepción</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">Vitacura</a></li>
+            <li><a href="#" class="hover:text-blue-400 transition">San Joaquín</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-4">Contacto</h3>
+          <p class="mb-2"><i data-feather="mail" class="inline mr-2 w-4 h-4"></i> biblioteca@usm.cl</p>
+          <p class="mb-2"><i data-feather="phone" class="inline mr-2 w-4 h-4"></i> +56 32 2654 321</p>
+          <p><i data-feather="map-pin" class="inline mr-2 w-4 h-4"></i> Avenida España 1680, Valparaíso</p>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-6 text-center text-gray-400">
+        <p>© 2025 DIUpibes Inc. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <div id="vanta-bg"></div>
+  <script>
+    VANTA.GLOBE({
+      el: "#vanta-bg",
+      mouseControls: true, touchControls: true, gyroControls: false,
+      minHeight: 200.00, minWidth: 200.00, scale: 1.00, scaleMobile: 1.00,
+      color: 0x3b82f6, backgroundColor: 0xf8fafc, size: 0.8
+    });
+    feather.replace();
+  </script>
+  <!-- Modal de confirmación -->
+  <div id="confirmModal" class="hidden fixed inset-0 z-50" role="dialog" aria-modal="true"
+    aria-labelledby="confirmTitle">
+    <!-- Fondo -->
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <!-- Panel -->
+    <div class="relative mx-auto mt-20 max-w-xl rounded-xl bg-white shadow-xl border border-slate-200">
+      <div class="p-5 border-b border-slate-200">
+        <h2 id="confirmTitle" class="text-lg font-semibold text-slate-900">Confirmar reserva</h2>
+        <p class="text-sm text-slate-600 mt-1">Revisa los bloques seleccionados antes de confirmar.</p>
+      </div>
+
+      <div class="p-5 max-h-80 overflow-auto">
+        <div id="summaryContainer" class="space-y-3 text-slate-800 text-sm"></div>
+        <p id="emptyWarning" class="hidden text-amber-600 text-sm mt-2">No has seleccionado ningún bloque.</p>
+      </div>
+
+      <div class="flex justify-end gap-2 p-4 border-t border-slate-200 bg-slate-50">
+        <button id="cancelBtn" class="px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-white">
+          Volver atrás
+        </button>
+        <button id="confirmBtn" class="px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-500">
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const reserveBtn = document.getElementById('reserveBtn');
+    const modal = document.getElementById('confirmModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const summaryContainer = document.getElementById('summaryContainer');
+    const emptyWarning = document.getElementById('emptyWarning');
+
+    function hhToRange(hh) {
+      if (!hh) return '';
+      return `${hh}:00–${hh}:59`;
+    }
+
+    function buildSummary() {
+      const rows = [...document.querySelectorAll('.timeline-row')];
+      const grouped = {}; // { "Sala 01 — ...": ["08:00–08:59", "10:00–10:59"] }
+
+      rows.forEach(row => {
+        const roomEl = row.querySelector('.font-semibold');
+        if (!roomEl) return;
+        const room = roomEl.textContent.trim();
+
+        const checked = [...row.querySelectorAll('.hour input:checked')];
+        if (checked.length === 0) return;
+
+        checked.forEach(inp => {
+          const lbl = inp.nextElementSibling;
+          let title = lbl?.getAttribute('title') || '';
+          if (!title) {
+            const m = inp.id.match(/h(\d{2})/);
+            if (m) title = hhToRange(m[1]);
+          }
+          if (!grouped[room]) grouped[room] = [];
+          grouped[room].push(title || 'Horario seleccionado');
+        });
+      });
+
+      // Render
+      summaryContainer.innerHTML = '';
+      const rooms = Object.keys(grouped);
+
+      if (rooms.length === 0) {
+        emptyWarning.classList.remove('hidden');
+        summaryContainer.innerHTML = '<p class="text-slate-600">Selecciona al menos un bloque horario.</p>';
+        return false;
+      } else {
+        emptyWarning.classList.add('hidden');
+      }
+
+      rooms.forEach(room => {
+        const times = grouped[room].sort((a, b) => a.localeCompare(b, 'es'));
+        const item = document.createElement('div');
+        item.innerHTML = `
+        <div class="font-medium text-slate-900">${room}</div>
+        <ul class="list-disc list-inside text-slate-700">
+          ${times.map(t => `<li>${t}</li>`).join('')}
+        </ul>
+      `;
+        summaryContainer.appendChild(item);
+      });
+
+      return true;
+    }
+
+    function openModal() { modal.classList.remove('hidden'); }
+    function closeModal() { modal.classList.add('hidden'); }
+
+    reserveBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const ok = buildSummary();
+      openModal();
+      confirmBtn.disabled = !ok;
+      confirmBtn.classList.toggle('opacity-50', !ok);
+      confirmBtn.classList.toggle('cursor-not-allowed', !ok);
+    });
+
+    cancelBtn?.addEventListener('click', () => closeModal());
+
+    confirmBtn?.addEventListener('click', () => {
+      if (confirmBtn.disabled) return;
+
+      alert('✅ ¡Reserva confirmada!');
+      document.querySelectorAll('.hour input:checked').forEach(i => i.checked = false);
+      closeModal();
+
+      // 🔀 Redirige a index.html después de 1 segundo (puedes ajustar el tiempo o quitarlo)
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1000);
+    });
+
+
+    modal?.addEventListener('click', (ev) => {
+      if (ev.target === modal) closeModal();
+    });
+
+    window.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+    });
+  </script>
+
+</body>
+
+</html>
