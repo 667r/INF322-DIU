@@ -112,13 +112,13 @@
         <div class="container mx-auto px-4 text-center relative z-10">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">Explora el conocimiento sin límites</h1>
             <p class="text-xl mb-8">Tu portal de acceso a recursos académicos y servicios bibliotecarios</p>
-            <div class="relative max-w-2xl mx-auto">
-                <input type="text" placeholder="Ingrese términos de búsqueda" class="w-full py-3 px-4 rounded-full shadow-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full">
+            <form id="global-search-form" action="catalogo.html" method="get" class="relative max-w-2xl mx-auto">
+                <input type="text" name="q" placeholder="Ingrese términos de búsqueda" class="w-full py-3 px-4 rounded-full shadow-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full">
                     <i data-feather="search"></i>
                 </button>
-            </div>
-        </div>
+            </form>
+</div>
     </div>
 
     <!-- Quick Links -->
@@ -348,10 +348,17 @@
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
+        // Handle search form submission with query param
+        document.getElementById('global-search-form').addEventListener('submit', function(e) {
+            const searchInput = this.querySelector('input[name="q"]');
+            if (!searchInput.value.trim()) {
+                e.preventDefault();
+            }
+        });
 
         // Vanta.js background
         VANTA.GLOBE({
-            el: "#vanta-bg",
+el: "#vanta-bg",
             mouseControls: true,
             touchControls: true,
             gyroControls: false,
