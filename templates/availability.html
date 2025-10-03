@@ -575,7 +575,6 @@
       reservationHistory.push(reservation);
       localStorage.setItem('roomReservations', JSON.stringify(reservationHistory));
       
-      alert('✅ ¡Reserva confirmada!');
       document.querySelectorAll('.hour input:checked').forEach(i => i.checked = false);
       closeModal();
       updateUndoButton();
@@ -593,7 +592,6 @@
       const lastReservation = reservationHistory.pop();
       localStorage.setItem('roomReservations', JSON.stringify(reservationHistory));
       
-      alert('✅ Se deshizo la última reserva');
       updateUndoButton();
     });
 
