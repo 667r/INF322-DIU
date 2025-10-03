@@ -146,6 +146,19 @@
             <div class="lg:w-3/4">
                 <h1 class="text-3xl font-bold text-gray-800 mb-8">Explora nuestro catálogo</h1>
                 
+                <!-- Mis Reservas Section -->
+                <div id="my-reservations-section" class="mb-8 hidden">
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg shadow-md p-6 border-l-4 border-blue-600">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i data-feather="bookmark" class="mr-2"></i>
+                            Mis Reservas
+                        </h2>
+                        <div id="my-reservations-list" class="space-y-3">
+                            <!-- Reserved books will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Search Form -->
                 <div class="bg-white rounded-lg shadow-md p-6 mb-8">
                     <form id="search-form" class="flex flex-col md:flex-row gap-4">
@@ -190,14 +203,19 @@
                                             <p class="text-gray-700 book-publisher"></p>
                                         </div>
                                     </div>
-                                    <div class="flex flex-wrap gap-2 items-center justify-between">
+                                     <div class="flex flex-wrap gap-2 items-center justify-between">
                                         <div>
                                             <span class="px-2 py-1 text-xs rounded-full book-status"></span>
                                             <span class="text-sm text-gray-600 book-location"></span>
                                         </div>
-                                        <button class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition reserve-btn disabled:bg-gray-400 disabled:cursor-not-allowed">
-                                            Reservar
-                                        </button>
+                                        <div class="flex gap-2">
+                                            <button class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition undo-btn hidden disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                                Deshacer
+                                            </button>
+                                            <button class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition reserve-btn disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                                Reservar
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -217,8 +235,51 @@
 </div>
         </div>
     </main>
-<!-- Reuse existing footer -->
-    <footer class="bg-gray-900 text-white pt-12 pb-6">
+    <!-- Reservation Confirmation Modal -->
+    <div id="reservation-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-xl w-11/12 max-w-md p-6 animate-fadeIn">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Confirmar reserva</h2>
+        <p id="reservation-message" class="text-gray-600 mb-6">
+          ¿Deseas reservar este libro?
+        </p>
+        <div class="flex justify-end gap-3">
+          <button id="cancel-reservation-btn" 
+                  class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-medium">
+            Cancelar
+          </button>
+          <button id="confirm-reservation-btn" 
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+      <!-- Confirmación de Cancelación -->
+  <div id="cancel-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-11/12 max-w-md p-6 animate-fadeIn">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">Cancelar reserva</h2>
+      <p id="cancel-message" class="text-gray-600 mb-6"></p>
+      <div class="flex justify-end gap-3">
+        <button id="cancel-cancel-btn"
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-medium">Volver</button>
+        <button id="confirm-cancel-btn"
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium">Cancelar reserva</button>
+      </div>
+    </div>
+  </div>
+
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .animate-fadeIn {
+        animation: fadeIn 0.2s ease-out;
+      }
+    </style>
+
+    <!-- Reuse existing footer -->
+<footer class="bg-gray-900 text-white pt-12 pb-6">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <div>
@@ -263,6 +324,9 @@
         </div>
     </footer>
     <script>
+        // Load book reservations from localStorage
+        let bookReservations = JSON.parse(localStorage.getItem('bookReservations') || '{}');
+        
         // Book data
         const books = [
             {
@@ -329,6 +393,136 @@
                 type: "book",
                 dueDate: "",
                 description: "Novela psicológica que explora la obsesión y la soledad a través de la confesión de un pintor asesino."
+            },
+            {
+                title: "Ingeniería de Software: Un Enfoque Práctico",
+                author: "Roger S. Pressman",
+                cover: "http://static.photos/education/120x180/6",
+                isbn: "978-6071503145",
+                year: "2010",
+                publisher: "McGraw-Hill",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "book",
+                dueDate: "",
+                description: "Guía completa sobre metodologías y prácticas en ingeniería de software moderna."
+            },
+            {
+                title: "Estructuras de Datos en Java",
+                author: "Mark Allen Weiss",
+                cover: "http://static.photos/education/120x180/7",
+                isbn: "978-8478290499",
+                year: "2013",
+                publisher: "Pearson",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "book",
+                dueDate: "",
+                description: "Análisis profundo de estructuras de datos y algoritmos con implementaciones en Java."
+            },
+            {
+                title: "Introducción a los Sistemas Digitales",
+                author: "Thomas L. Floyd",
+                cover: "http://static.photos/education/120x180/8",
+                isbn: "978-9702613077",
+                year: "2012",
+                publisher: "Pearson",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "book",
+                dueDate: "",
+                description: "Fundamentos de electrónica digital y diseño de circuitos lógicos."
+            },
+            {
+                title: "Física Universitaria Vol. 1",
+                author: "Sears, Zemansky",
+                cover: "http://static.photos/education/120x180/9",
+                isbn: "978-6073221252",
+                year: "2013",
+                publisher: "Pearson",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "book",
+                dueDate: "",
+                description: "Texto fundamental de física para carreras de ingeniería y ciencias."
+            },
+            {
+                title: "Cálculo Diferencial e Integral",
+                author: "James Stewart",
+                cover: "http://static.photos/education/120x180/10",
+                isbn: "978-6074817188",
+                year: "2012",
+                publisher: "Cengage Learning",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "book",
+                dueDate: "",
+                description: "Manual completo de cálculo para estudiantes de ingeniería."
+            },
+            {
+                title: "Machine Learning Algorithms for Predictive Analytics",
+                author: "Dr. María González",
+                cover: "http://static.photos/education/120x180/11",
+                isbn: "978-1234567890",
+                year: "2023",
+                publisher: "IEEE",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "thesis",
+                dueDate: "",
+                description: "Investigación sobre algoritmos de aprendizaje automático aplicados a análisis predictivo en sistemas complejos."
+            },
+            {
+                title: "Quantum Computing Applications in Cryptography",
+                author: "Dr. Carlos Ramírez",
+                cover: "http://static.photos/education/120x180/12",
+                isbn: "978-1234567891",
+                year: "2024",
+                publisher: "Nature",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "thesis",
+                dueDate: "",
+                description: "Análisis de aplicaciones de computación cuántica en sistemas criptográficos modernos."
+            },
+            {
+                title: "Sustainable Energy Systems: A Comprehensive Review",
+                author: "Dr. Ana Torres",
+                cover: "http://static.photos/education/120x180/13",
+                isbn: "978-1234567892",
+                year: "2023",
+                publisher: "Science Direct",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "thesis",
+                dueDate: "",
+                description: "Revisión exhaustiva de sistemas de energía sostenible y su implementación en Chile."
+            },
+            {
+                title: "Neural Networks for Image Recognition",
+                author: "Dr. Roberto Silva",
+                cover: "http://static.photos/education/120x180/14",
+                isbn: "978-1234567893",
+                year: "2024",
+                publisher: "ACM",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "thesis",
+                dueDate: "",
+                description: "Desarrollo de redes neuronales optimizadas para reconocimiento de imágenes en tiempo real."
+            },
+            {
+                title: "Advanced Materials for Semiconductor Manufacturing",
+                author: "Dr. Patricia Muñoz",
+                cover: "http://static.photos/education/120x180/15",
+                isbn: "978-1234567894",
+                year: "2023",
+                publisher: "Springer",
+                status: "available",
+                libraries: ["Campus San Joaquín"],
+                type: "thesis",
+                dueDate: "",
+                description: "Investigación sobre materiales avanzados para la fabricación de semiconductores de nueva generación."
             }
         ];
 // Status classes
@@ -345,6 +539,109 @@
             reserved: "Reservado"
         };
 
+        // Render My Reservations
+        function renderMyReservations() {
+            const section = document.getElementById('my-reservations-section');
+            const container = document.getElementById('my-reservations-list');
+            
+            // Get user's reserved books
+            const reservedBooks = books.filter(book => bookReservations[book.isbn]);
+            
+            if (reservedBooks.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            section.classList.remove('hidden');
+            container.innerHTML = '';
+            
+            reservedBooks.forEach(book => {
+                const reservationDiv = document.createElement('div');
+                reservationDiv.className = 'bg-white rounded-lg p-4 flex items-center justify-between shadow hover:shadow-md transition';
+                
+                reservationDiv.innerHTML = `
+                    <div class="flex items-center gap-4 flex-1">
+                        <img src="${book.cover}" alt="${book.title}" class="w-16 h-24 object-cover rounded">
+                        <div>
+                            <h3 class="font-bold text-gray-800">${book.title}</h3>
+                            <p class="text-sm text-gray-600">${book.author}</p>
+                            <p class="text-xs text-blue-600 mt-1">${book.libraries.join(', ')}</p>
+                        </div>
+                    </div>
+                    <button 
+                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm cancel-btn" 
+                        data-isbn="${book.isbn}">
+                        Cancelar
+                    </button>
+                `;
+                
+                container.appendChild(reservationDiv);
+            });
+
+            // Delegación de eventos para los botones de cancelar
+            document.querySelectorAll('.cancel-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const isbn = e.target.getAttribute('data-isbn');
+                    const book = reservedBooks.find(b => b.isbn === isbn);
+
+                    const modal = document.getElementById("cancel-modal");
+                    const message = document.getElementById("cancel-message");
+                    const confirmBtn = document.getElementById("confirm-cancel-btn");
+                    const cancelBtn = document.getElementById("cancel-cancel-btn");
+
+                    // Configurar mensaje del modal
+                    message.textContent = `¿Seguro que quieres cancelar la reserva de "${book.title}"?`;
+                    modal.classList.remove("hidden");
+                    modal.classList.add("flex");
+
+                    // Handler confirmar cancelación
+                    const confirmHandler = () => {
+                        book.status = 'available';
+                        delete bookReservations[book.isbn];
+                        localStorage.setItem('bookReservations', JSON.stringify(bookReservations));
+
+                        modal.classList.add("hidden");
+                        modal.classList.remove("flex");
+
+                        renderBooks();
+                        renderMyReservations();
+
+                        confirmBtn.removeEventListener("click", confirmHandler);
+                        cancelBtn.removeEventListener("click", cancelHandler);
+                    };
+
+                    // Handler cancelar acción
+                    const cancelHandler = () => {
+                        modal.classList.add("hidden");
+                        modal.classList.remove("flex");
+
+                        confirmBtn.removeEventListener("click", confirmHandler);
+                        cancelBtn.removeEventListener("click", cancelHandler);
+                    };
+
+                    confirmBtn.addEventListener("click", confirmHandler);
+                    cancelBtn.addEventListener("click", cancelHandler);
+                });
+            });
+
+            // Add event listeners for undo buttons
+            container.querySelectorAll('.undo-reservation').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const isbn = e.target.dataset.isbn;
+                    const book = books.find(b => b.isbn === isbn);
+                    
+                    if (confirm(`¿Cancelar la reserva de "${book.title}"?`)) {
+                        book.status = 'available';
+                        delete bookReservations[isbn];
+                        localStorage.setItem('bookReservations', JSON.stringify(bookReservations));
+                        alert('✅ Reserva cancelada exitosamente');
+                        renderBooks();
+                        renderMyReservations();
+                    }
+                });
+            });
+        }
+
         // Render books
         function renderBooks(filteredBooks = books) {
             const resultsContainer = document.getElementById('book-results');
@@ -353,6 +650,8 @@
             resultsContainer.innerHTML = '';
             
             filteredBooks.forEach(book => {
+                    // 🚨 Evita mostrar libros reservados en lista principal
+                if (book.status === 'reserved' && !bookReservations[book.isbn]) return;
                 const clone = template.content.cloneNode(true);
                 const item = clone.querySelector('.book-item');
                 
@@ -382,18 +681,109 @@
                 
                 // Set reserve button state
                 const reserveBtn = clone.querySelector('.reserve-btn');
+                const undoBtn = clone.querySelector('.undo-btn');
+                
+                // Check if this book was reserved by user
+                const wasReserved = bookReservations[book.isbn];
+                
                 if (book.status !== 'available') {
                     reserveBtn.disabled = true;
+                    
+                    // Show undo button only for user's own reservations
+                    if (wasReserved && book.status === 'reserved') {
+                        const modal = document.getElementById("cancel-modal");
+                        const message = document.getElementById("cancel-message");
+                        const confirmBtn = document.getElementById("confirm-cancel-btn");
+                        const cancelBtn = document.getElementById("cancel-cancel-btn");
+                        
+                        undoBtn.classList.remove('hidden');
+                        undoBtn.addEventListener('click', () => {
+                            // Configurar modal
+                            message.textContent = `¿Seguro que quieres cancelar la reserva de "${book.title}"?`;
+                            modal.classList.remove("hidden");
+                            modal.classList.add("flex");
+
+                            // Handler confirmar cancelación
+                            const confirmHandler = () => {
+                                book.status = 'available';
+                                delete bookReservations[book.isbn];
+                                localStorage.setItem('bookReservations', JSON.stringify(bookReservations));
+
+                                modal.classList.add("hidden");
+                                modal.classList.remove("flex");
+
+                                renderBooks();
+                                renderMyReservations();
+
+                                // limpiar listeners
+                                confirmBtn.removeEventListener("click", confirmHandler);
+                                cancelBtn.removeEventListener("click", cancelHandler);
+                            };
+
+                            // Handler cancelar acción
+                            const cancelHandler = () => {
+                                modal.classList.add("hidden");
+                                modal.classList.remove("flex");
+
+                                confirmBtn.removeEventListener("click", confirmHandler);
+                                cancelBtn.removeEventListener("click", cancelHandler);
+                            };
+
+                            confirmBtn.addEventListener("click", confirmHandler);
+                            cancelBtn.addEventListener("click", cancelHandler);
+                        });
+                    }
+
                 } else {
                     reserveBtn.addEventListener('click', () => {
-                        alert(`Has reservado "${book.title}". Por favor recógelo en 48 horas.`);
-                        book.status = 'reserved';
-                        renderBooks();
-                    });
+                        // Configurar modal
+                        const modal = document.getElementById("reservation-modal");
+                        const message = document.getElementById("reservation-message");
+                        const confirmBtn = document.getElementById("confirm-reservation-btn");
+                        const cancelBtn = document.getElementById("cancel-reservation-btn");
+
+                        message.textContent = `¿Quieres reservar "${book.title}" de ${book.author}?`;
+                        modal.classList.remove("hidden");
+                        modal.classList.add("flex");
+
+                        // Handler para confirmar
+                        const confirmHandler = () => {
+                            book.status = 'reserved';
+                            bookReservations[book.isbn] = {
+                                title: book.title,
+                                timestamp: Date.now()
+                            };
+                            localStorage.setItem('bookReservations', JSON.stringify(bookReservations));
+
+                            modal.classList.add("hidden");
+                            modal.classList.remove("flex");
+
+                            renderBooks();
+                            renderMyReservations();
+
+                            // limpiar event listeners
+                            confirmBtn.removeEventListener("click", confirmHandler);
+                            cancelBtn.removeEventListener("click", cancelHandler);
+                        };
+
+                        // Handler para cancelar
+                        const cancelHandler = () => {
+                            modal.classList.add("hidden");
+                            modal.classList.remove("flex");
+                            confirmBtn.removeEventListener("click", confirmHandler);
+                            cancelBtn.removeEventListener("click", cancelHandler);
+                        };
+
+                        confirmBtn.addEventListener("click", confirmHandler);
+                        cancelBtn.addEventListener("click", cancelHandler);
+});
                 }
                 
                 resultsContainer.appendChild(clone);
             });
+            
+            // Update My Reservations section
+            renderMyReservations();
         }
 
         // Filter books

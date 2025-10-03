@@ -38,13 +38,13 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="#" class="flex items-center">
+                    <a href="index.html" class="flex items-center">
                         <img src="https://libapps.s3.amazonaws.com/sites/13565/groups/23921/banner/Direccio%CC%81n_de_Informacio%CC%81n_y_Documentacio%CC%81n_Bibliogra%CC%81fica_Institucional.png" class="h-10 mr-2" alt="Logo">
                         <span class="text-xl font-bold text-gray-800">BiblioUSM Makeover</span>
                     </a>
                 </div>
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#" class="text-blue-600 font-medium">Inicio</a>
+                    <a href="index.html" class="text-blue-600 font-medium">Inicio</a>
                     <div class="relative group">
                         <button class="text-gray-700 hover:text-blue-600 flex items-center">
                             Tu Biblioteca <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
@@ -189,6 +189,27 @@
                 Mostrar disponibilidad
             </a>
         </div>
+        <section id="myReservationsSection" class="hidden mt-10">
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Mis Reservas</h2>
+            <div id="myReservationsContainer" class="space-y-3"></div>
+        </section>
+        <!-- Modal Cancelación -->
+        <div id="cancelModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-11/12 max-w-md p-6 animate-fadeIn">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Cancelar reserva</h2>
+            <p id="cancelMessage" class="text-gray-600 mb-6"></p>
+            <div class="flex justify-end gap-3">
+            <button id="cancelCancelBtn"
+                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 font-medium">
+                Volver
+            </button>
+            <button id="confirmCancelBtn"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium">
+                Cancelar reserva
+            </button>
+            </div>
+        </div>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -259,6 +280,148 @@
         // Mobile menu toggle
         document.getElementById('menu-toggle').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        function renderMyReservations() {
+            const section = document.getElementById("myReservationsSection");
+            const container = document.getElementById("myReservationsContainer");
+            container.innerHTML = "";
+
+            if (!reservationHistory || reservationHistory.length === 0) {
+                section.classList.add("hidden");
+                return;
+            }
+
+            section.classList.remove("hidden");
+
+            reservationHistory.forEach((res, idx) => {
+                const div = document.createElement("div");
+                div.className = "bg-white rounded-lg p-4 flex items-center justify-between shadow hover:shadow-md transition";
+
+                // Mostrar la fecha + los slots reservados
+                const date = new Date(res.timestamp).toLocaleString("es-ES");
+                const slots = res.slots.map(id => {
+                const m = id.match(/h(\d{2})/);
+                return m ? `${m[1]}:00–${m[1]}:59` : id;
+                });
+
+                div.innerHTML = `
+                <div>
+                    <h3 class="font-bold text-gray-800">Reserva del ${date}</h3>
+                    <p class="text-sm text-gray-600">Espacios reservados: ${slots.join(", ")}</p>
+                </div>
+                <button data-idx="${idx}"
+                    class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm cancel-reservation">
+                    Cancelar
+                </button>
+                `;
+
+                container.appendChild(div);
+            });
+
+            attachCancelHandlers();
+        }
+        function attachCancelHandlers() {
+            const cancelButtons = document.querySelectorAll(".cancel-reservation");
+            const modal = document.getElementById("cancelModal");
+            const message = document.getElementById("cancelMessage");
+            const confirmBtn = document.getElementById("confirmCancelBtn");
+            const cancelBtn = document.getElementById("cancelCancelBtn");
+
+            cancelButtons.forEach(btn => {
+                btn.addEventListener("click", () => {
+                const idx = btn.getAttribute("data-idx");
+                const res = reservationHistory[idx];
+
+                message.textContent = `¿Seguro que quieres cancelar la reserva del ${new Date(res.timestamp).toLocaleString("es-ES")}?`;
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+
+                const confirmHandler = () => {
+                    reservationHistory.splice(idx, 1);
+                    localStorage.setItem("roomReservations", JSON.stringify(reservationHistory));
+
+                    modal.classList.add("hidden");
+                    modal.classList.remove("flex");
+
+                    renderMyReservations();
+                    updateUndoButton();
+
+                    confirmBtn.removeEventListener("click", confirmHandler);
+                    cancelBtn.removeEventListener("click", cancelHandler);
+                };
+
+                const cancelHandler = () => {
+                    modal.classList.add("hidden");
+                    modal.classList.remove("flex");
+                    confirmBtn.removeEventListener("click", confirmHandler);
+                    cancelBtn.removeEventListener("click", cancelHandler);
+                };
+
+                confirmBtn.addEventListener("click", confirmHandler);
+                cancelBtn.addEventListener("click", cancelHandler);
+                });
+            });
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            reservationHistory = JSON.parse(localStorage.getItem("roomReservations") || "[]");
+            renderMyReservations();
+            });
+
+            confirmBtn?.addEventListener("click", () => {
+            if (confirmBtn.disabled) return;
+
+            const checkedInputs = [...document.querySelectorAll(".hour input:checked")];
+            const reservation = {
+                timestamp: Date.now(),
+                slots: checkedInputs.map(inp => inp.id)
+            };
+
+            reservationHistory.push(reservation);
+            localStorage.setItem("roomReservations", JSON.stringify(reservationHistory));
+
+            alert("✅ ¡Reserva confirmada!");
+            document.querySelectorAll(".hour input:checked").forEach(i => i.checked = false);
+            closeModal();
+            updateUndoButton();
+            renderMyReservations();
+            });
+
+
+        // Check if it's past 8PM and auto-advance to next day
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            
+            // If it's past 8PM (20:00), redirect to availability with next day parameter
+            if (currentHour >= 20) {
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                // Store the next day date in sessionStorage for availability page to use
+                sessionStorage.setItem('autoAdvanceDate', tomorrow.toISOString().split('T')[0]);
+                
+                // Show a message to the user
+                const mainContent = document.querySelector('main');
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'bg-blue-50 border-l-4 border-blue-400 p-4 mb-6';
+                alertDiv.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i data-feather="info" class="h-5 w-5 text-blue-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                Son más de las 8PM. Las reservas se mostrarán para mañana (${tomorrow.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}).
+                            </p>
+                        </div>
+                    </div>
+                `;
+                mainContent.insertBefore(alertDiv, mainContent.firstChild.nextSibling);
+                feather.replace();
+            } else {
+                // Clear any stored date if it's before 8PM
+                sessionStorage.removeItem('autoAdvanceDate');
+            }
         });
 
         // Vanta.js background
