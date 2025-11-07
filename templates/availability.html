@@ -80,7 +80,7 @@
       inset: 6px;
       border-radius: 8px;
       background: rgba(15, 23, 42, .02);
-      outline: 1px solid rgba(15, 23, 42, .08);
+      outline: 1px solid rgba(15, 23, 42, .25);
       transition: transform .08s ease, background .12s ease, box-shadow .12s ease, outline-color .12s ease;
     }
 
@@ -157,7 +157,7 @@
           </a>
         </div>
         <div class="hidden md:flex items-center space-x-8">
-          <a href="#" class="text-blue-600 font-medium">Inicio</a>
+          <a href="index.html" class="text-blue-600 font-medium">Inicio</a>
           <div class="relative group">
             <button class="text-gray-700 hover:text-blue-600 flex items-center">
               Tu Biblioteca <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
@@ -195,7 +195,7 @@
   <!-- Mobile Menu -->
   <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
     <div class="px-2 pt-2 pb-3 space-y-1">
-      <a href="#" class="block px-3 py-2 text-blue-600 font-medium">Inicio</a>
+      <a href="index.html" class="block px-3 py-2 text-blue-600 font-medium">Inicio</a>
       <div class="relative">
         <button class="w-full text-left px-3 py-2 text-gray-700 hover:text-blue-600 flex justify-between items-center">
           Tu Biblioteca <i data-feather="chevron-down" class="ml-1 w-4 h-4"></i>
@@ -225,6 +225,7 @@
     <section class="mb-6">
       <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Disponibilidad</h1>
       <p class="text-slate-600 mt-1">Selección por hora (08:00-20:00). Cada bloque marca 60 minutos.</p>
+      <p id="current-date" class="text-slate-700 font-medium mt-2"></p>
 
       <div class="mt-4 flex flex-wrap items-center gap-3">
         <label class="inline-flex items-center gap-2 bg-white shadow-sm border border-slate-200 rounded-lg px-3 py-2">
@@ -366,11 +367,14 @@
 
       <!-- Acciones -->
       <div class="flex justify-end gap-2 px-3 py-3 border-t border-slate-200 bg-slate-50">
+        <button id="undoReservationBtn"
+          class="px-3 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 hidden">Deshacer última reserva</button>
         <button id="reserveBtn"
           class="px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-500">Reservar
           selección</button>
       </div>
     </div>
+    
 
   </main>
 
@@ -459,12 +463,35 @@
     </div>
   </div>
   <script>
+    // Display current date
+    function updateCurrentDate() {
+      const dateEl = document.getElementById('current-date');
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      dateEl.textContent = '📅 ' + now.toLocaleDateString('es-ES', options);
+    }
+    updateCurrentDate();
+
     const reserveBtn = document.getElementById('reserveBtn');
+    const undoReservationBtn = document.getElementById('undoReservationBtn');
     const modal = document.getElementById('confirmModal');
     const cancelBtn = document.getElementById('cancelBtn');
     const confirmBtn = document.getElementById('confirmBtn');
     const summaryContainer = document.getElementById('summaryContainer');
     const emptyWarning = document.getElementById('emptyWarning');
+    
+    // Load previous reservations from localStorage
+    let reservationHistory = JSON.parse(localStorage.getItem('roomReservations') || '[]');
+    
+    function updateUndoButton() {
+      if (reservationHistory.length > 0) {
+        undoReservationBtn.classList.remove('hidden');
+      } else {
+        undoReservationBtn.classList.add('hidden');
+      }
+    }
+    
+    updateUndoButton();
 
     function hhToRange(hh) {
       if (!hh) return '';
@@ -539,14 +566,33 @@
     confirmBtn?.addEventListener('click', () => {
       if (confirmBtn.disabled) return;
 
-      alert('✅ ¡Reserva confirmada!');
+      // Save reservation to history
+      const checkedInputs = [...document.querySelectorAll('.hour input:checked')];
+      const reservation = {
+        timestamp: Date.now(),
+        slots: checkedInputs.map(inp => inp.id)
+      };
+      reservationHistory.push(reservation);
+      localStorage.setItem('roomReservations', JSON.stringify(reservationHistory));
+      
       document.querySelectorAll('.hour input:checked').forEach(i => i.checked = false);
       closeModal();
+      updateUndoButton();
 
       // 🔀 Redirige a index.html después de 1 segundo (puedes ajustar el tiempo o quitarlo)
       setTimeout(() => {
         window.location.href = "index.html";
       }, 1000);
+    });
+    
+    // Undo last reservation
+    undoReservationBtn?.addEventListener('click', () => {
+      if (reservationHistory.length === 0) return;
+      
+      const lastReservation = reservationHistory.pop();
+      localStorage.setItem('roomReservations', JSON.stringify(reservationHistory));
+      
+      updateUndoButton();
     });
 
 
